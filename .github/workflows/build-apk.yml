@@ -1,7 +1,31 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.9'
+          channel: 'stable'
+      
       - name: Complete Gradle fix
         working-directory: mobile
         run: |
-          # Fix gradle-wrapper.properties
           mkdir -p android/gradle/wrapper
           cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
@@ -11,7 +35,6 @@
           zipStorePath=wrapper/dists
           EOF
           
-          # Fix build.gradle
           cat > android/build.gradle << 'EOF'
           buildscript {
               ext.kotlin_version = '1.9.0'
@@ -42,7 +65,6 @@
           }
           EOF
           
-          # Fix app/build.gradle
           cat > android/app/build.gradle << 'EOF'
           def localProperties = new Properties()
           def localPropertiesFile = rootProject.file('local.properties')
@@ -97,3 +119,15 @@
               implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
           }
           EOF
+      
+      - name: Build APK
+        working-directory: mobile
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build apk --release
+      
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bedtime-story-app
+          path: mobile/build/app/outputs/flutter-apk/app-release.apk
