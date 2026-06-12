@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
                       const SizedBox(height: 30),
                       _buildMainButtons(context),
                       const SizedBox(height: 30),
-                      _buildRecommendedStories(),
+                      _buildRecommendedStories(context),
                     ],
                   ),
                 ),
@@ -60,11 +60,15 @@ class HomePage extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.history),
-                onPressed: () => Navigator.pushNamed(context, '/stories'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/stories');
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.person),
-                onPressed: () => Navigator.pushNamed(context, '/profile'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/profile');
+                },
               ),
             ],
           ),
@@ -108,7 +112,9 @@ class HomePage extends StatelessWidget {
             title: '生成故事',
             subtitle: 'AI智能定制',
             color: AppTheme.primaryColor,
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/generate');
+            },
           ),
         ),
         const SizedBox(width: 16),
@@ -119,7 +125,9 @@ class HomePage extends StatelessWidget {
             title: '故事库',
             subtitle: '精选好故事',
             color: AppTheme.secondaryColor,
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/stories');
+            },
           ),
         ),
       ],
@@ -171,7 +179,26 @@ class HomePage extends StatelessWidget {
     );
   }
   
-  Widget _buildRecommendedStories() {
+  Widget _buildRecommendedStories(BuildContext context) {
+    // 推荐故事数据
+    final List<Map<String, dynamic>> stories = [
+      {
+        'title': '勇敢的小兔子',
+        'description': '教会孩子勇敢面对困难',
+        'icon': Icons.auto_stories,
+      },
+      {
+        'title': '星星的魔法',
+        'description': '温馨的睡前童话',
+        'icon': Icons.star,
+      },
+      {
+        'title': '小熊猫的冒险',
+        'description': '充满探索精神的旅程',
+        'icon': Icons.forest,
+      },
+    ];
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -181,61 +208,78 @@ class HomePage extends StatelessWidget {
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
+          itemCount: stories.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
-            return _buildStoryCard();
+            final story = stories[index];
+            return _buildStoryCard(
+              context,
+              title: story['title'] as String,
+              description: story['description'] as String,
+              icon: story['icon'] as IconData,
+            );
           },
         ),
       ],
     );
   }
   
-  Widget _buildStoryCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+  Widget _buildStoryCard(BuildContext context,
+      {required String title,
+      required String description,
+      required IconData icon}) {
+    return GestureDetector(
+      onTap: () {
+        // 点击推荐故事跳转到故事详情（暂时跳转到故事库）
+        Navigator.pushNamed(context, '/stories');
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            child: const Icon(Icons.auto_stories, color: AppTheme.primaryColor),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('勇敢的小兔子',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                Text('教会孩子勇敢面对困难',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-              ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: AppTheme.primaryColor),
             ),
-          ),
-          const Icon(Icons.play_circle, color: AppTheme.primaryColor),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(description,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                ],
+              ),
+            ),
+            const Icon(Icons.play_circle, color: AppTheme.primaryColor),
+          ],
+        ),
       ),
     );
   }
   
   Widget _buildBottomNavigationBar(BuildContext context) {
+    int _currentIndex = 0;
+    
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -253,6 +297,23 @@ class HomePage extends StatelessWidget {
         elevation: 0,
         selectedItemColor: AppTheme.primaryColor,
         unselectedItemColor: Colors.grey,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              // 已经在首页
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/generate');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/stories');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/profile');
+              break;
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
           BottomNavigationBarItem(icon: Icon(Icons.auto_awesome), label: '生成'),
