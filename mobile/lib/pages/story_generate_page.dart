@@ -1,8 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../theme/app_theme.dart';
 
 class StoryGeneratePage extends StatefulWidget {
@@ -45,16 +43,20 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
     await _flutterTts.setPitch(1.0);
     
     _flutterTts.setCompletionHandler(() {
-      setState(() => _isPlaying = false);
+      if (mounted) {
+        setState(() => _isPlaying = false);
+      }
     });
   }
 
   Future<void> _loadSavedInfo() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _nameController.text = prefs.getString('child_name') ?? '';
-      _ageController.text = prefs.getString('child_age') ?? '';
-    });
+    if (mounted) {
+      setState(() {
+        _nameController.text = prefs.getString('child_name') ?? '';
+        _ageController.text = prefs.getString('child_age') ?? '';
+      });
+    }
   }
 
   Future<void> _saveChildInfo() async {
@@ -76,21 +78,23 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
     
     await _saveChildInfo();
     
-    // 模拟AI生成故事（实际使用时替换为真实API）
+    // 模拟AI生成故事
     await Future.delayed(const Duration(seconds: 2));
     
     final story = _generateMockStory();
     
-    setState(() {
-      _generatedStory = story;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _generatedStory = story;
+        _isLoading = false;
+      });
+    }
   }
   
   String _generateMockStory() {
     final name = _nameController.text;
-    final age = _ageController.text;
-    final style = _styles[_selectedStyle] ?? '童话风';
+    final age = _ageController.text.isEmpty ? '?' : _ageController.text;
+    final styleName = _styles[_selectedStyle] ?? '童话风';
     final interestsText = _interests.isEmpty ? '' : '喜欢';
     
     final stories = {
@@ -101,7 +105,7 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
 
 今年岁，。一天晚上，发现床边出现了一颗闪闪发光的星星。
 
-“跟我来吧，我带你去一个神奇的地方！”星星说。
+"跟我来吧，我带你去一个神奇的地方！"星星说。
 
 跟着星星穿过彩虹桥，来到了梦幻王国。在这里，遇到了会说话的兔子、会跳舞的花朵，还帮助了迷路的小精灵找到回家的路。
 
@@ -127,7 +131,7 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
 
 抱着心爱的小熊，感觉特别安心。窗外，夜风轻轻吹过，带来花香。
 
-“晚安，，明天又是充满希望的一天。”
+"晚安，，明天又是充满希望的一天。"
 
 闭上眼睛，很快就进入了甜甜的梦乡。在梦里，和所有喜欢的事物在一起，开心地笑着。
 
@@ -154,13 +158,17 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
   Future<void> _speakStory() async {
     if (_generatedStory.isEmpty) return;
     
-    setState(() => _isPlaying = true);
+    if (mounted) {
+      setState(() => _isPlaying = true);
+    }
     await _flutterTts.speak(_generatedStory);
   }
 
   Future<void> _stopStory() async {
     await _flutterTts.stop();
-    setState(() => _isPlaying = false);
+    if (mounted) {
+      setState(() => _isPlaying = false);
+    }
   }
   
   Future<void> _saveStory() async {
@@ -172,6 +180,7 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
   }
 
   void _showMessage(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
@@ -295,13 +304,14 @@ class _StoryGeneratePageState extends State<StoryGeneratePage> {
                           label: Text(entry.value),
                           selected: isSelected,
                           onSelected: (selected) {
-                            setState(() {
-                              _selectedStyle = entry.key;
-                            });
+                            if (selected) {
+                              setState(() {
+                                _selectedStyle = entry.key;
+                              });
+                            }
                           },
                           backgroundColor: Colors.grey[200],
                           selectedColor: AppTheme.primaryColor,
-                          selectedLabelStyle: const TextStyle(color: Colors.white),
                         );
                       }).toList(),
                     ),
