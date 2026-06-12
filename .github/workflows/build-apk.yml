@@ -30,20 +30,20 @@ jobs:
           cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip
+          distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
           
           cat > android/build.gradle << 'EOF'
           buildscript {
-              ext.kotlin_version = '1.9.0'
+              ext.kotlin_version = '1.9.20'
               repositories {
                   google()
                   mavenCentral()
               }
               dependencies {
-                  classpath 'com.android.tools.build:gradle:7.4.2'
+                  classpath 'com.android.tools.build:gradle:8.3.0'
                   classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
               }
           }
@@ -90,19 +90,19 @@ jobs:
           apply from: flutterRoot + '/packages/flutter_tools/gradle/flutter.gradle'
           android {
               namespace 'com.bedtimestory.app'
-              compileSdk 33
+              compileSdk 34
               ndkVersion flutter.ndkVersion
               compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_11
-                  targetCompatibility JavaVersion.VERSION_11
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
               }
               kotlinOptions {
-                  jvmTarget = '11'
+                  jvmTarget = '17'
               }
               defaultConfig {
                   applicationId "com.bedtimestory.app"
                   minSdkVersion 21
-                  targetSdkVersion 33
+                  targetSdkVersion 34
                   versionCode flutterVersionCode.toInteger()
                   versionName flutterVersionName
               }
