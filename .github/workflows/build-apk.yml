@@ -20,8 +20,58 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2'
+          flutter-version: '3.16.9'
           channel: 'stable'
+      
+      - name: Fix Gradle for Flutter 3.16.9
+        run: |
+          cd mobile
+          
+          # ????? gradle-wrapper.properties
+          mkdir -p android/gradle/wrapper
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+          
+          # ????? build.gradle
+          cat > android/build.gradle << 'EOF'
+          buildscript {
+              ext.kotlin_version = '1.7.10'
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:7.2.0'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:\"
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.buildDir = '../build'
+          subprojects {
+              project.buildDir = "\/\"
+          }
+          subprojects {
+              project.evaluationDependsOn(':app')
+          }
+          tasks.register('clean', Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
+          
+          # ?? app/build.gradle
+          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle
+          
+          echo "Gradle fixed"
       
       - name: Build APK
         run: |
