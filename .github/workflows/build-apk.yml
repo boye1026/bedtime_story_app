@@ -20,78 +20,19 @@ jobs:
         with:
           flutter-version: '3.19.0'
       
-      - name: Setup Android project
+      - name: Create Android project
+        working-directory: mobile
+        run: flutter create --platforms=android .
+      
+      - name: Fix minSdk version
         working-directory: mobile
         run: |
-          rm -rf android
-          flutter create --platforms=android .
-          
-          # 直接写入正确的 build.gradle
-          cat > android/app/build.gradle << 'EOF'
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader ->
-        localProperties.load(reader)
-    }
-}
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found.")
-}
-def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
-if (flutterVersionCode == null) {
-    flutterVersionCode = '1'
-}
-def flutterVersionName = localProperties.getProperty('flutter.versionName')
-if (flutterVersionName == null) {
-    flutterVersionName = '1.0'
-}
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: flutterRoot + '/packages/flutter_tools/gradle/flutter.gradle'
-android {
-    namespace 'com.bedtimestory.app'
-    compileSdk 34
-    ndkVersion flutter.ndkVersion
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-    defaultConfig {
-        applicationId "com.bedtimestory.app"
-        minSdk 21
-        targetSdk 34
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
-    }
-    buildTypes {
-        release {
-            signingConfig signingConfigs.debug
-        }
-    }
-}
-flutter {
-    source '../..'
-}
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:"
-}
-EOF
-          
-          # 移除 AndroidManifest.xml 中的 uses-sdk
-          sed -i '/<uses-sdk/d' android/app/src/main/AndroidManifest.xml
-          
-          echo "Build.gradle fixed"
-          cat android/app/build.gradle | head -25
+          sed -i 's/minSdkVersion 19/minSdkVersion 21/g' android/app/build.gradle
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle
       
       - name: Install dependencies
         working-directory: mobile
         run: |
-          flutter clean
           flutter pub get
       
       - name: Build APK
