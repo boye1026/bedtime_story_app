@@ -1,0 +1,14 @@
+﻿# Flutter
+.Dart_tool/
+.pub/
+build/
+*.apk
+*.aab
+
+# Android
+android/.gradle/
+android/local.properties
+
+# IDE
+.idea/
+.vscode/
