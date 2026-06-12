@@ -21,6 +21,41 @@ jobs:
           flutter-version: '3.16.9'
           channel: 'stable'
       
+      - name: Fix Gradle configuration
+        run: |
+          cd mobile
+          # 更新 gradle wrapper 版本
+          mkdir -p android/gradle/wrapper
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-all.zip" > android/gradle/wrapper/gradle-wrapper.properties
+          
+          # 更新项目 gradle 配置
+          cat > android/build.gradle << 'EOF'
+          buildscript {
+              ext.kotlin_version = '1.9.22'
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.1.0'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:\"
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.buildDir = '../build'
+          subprojects {
+              project.buildDir = "\/\"
+          }
+          tasks.register('clean', Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
+      
       - name: Build APK
         run: |
           cd mobile
