@@ -116,3 +116,4 @@ EOF
         with:
           name: bedtime-story-app
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
+# Trigger rebuild: 2026-06-12 17:37:06
