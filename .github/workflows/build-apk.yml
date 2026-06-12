@@ -23,46 +23,105 @@ jobs:
           flutter-version: '3.16.9'
           channel: 'stable'
       
-      - name: Fix Gradle files
+      - name: Complete Gradle fix
         working-directory: mobile
         run: |
+          # ?? gradle-wrapper.properties
           mkdir -p android/gradle/wrapper
-          echo "distributionBase=GRADLE_USER_HOME" > android/gradle/wrapper/gradle-wrapper.properties
-          echo "distributionPath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip" >> android/gradle/wrapper/gradle-wrapper.properties
-          echo "zipStoreBase=GRADLE_USER_HOME" >> android/gradle/wrapper/gradle-wrapper.properties
-          echo "zipStorePath=wrapper/dists" >> android/gradle/wrapper/gradle-wrapper.properties
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-all.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
           
-          echo "buildscript {" > android/build.gradle
-          echo "    ext.kotlin_version = '1.7.10'" >> android/build.gradle
-          echo "    repositories {" >> android/build.gradle
-          echo "        google()" >> android/build.gradle
-          echo "        mavenCentral()" >> android/build.gradle
-          echo "    }" >> android/build.gradle
-          echo "    dependencies {" >> android/build.gradle
-          echo "        classpath 'com.android.tools.build:gradle:7.2.0'" >> android/build.gradle
-          echo "        classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:\$kotlin_version\"" >> android/build.gradle
-          echo "    }" >> android/build.gradle
-          echo "}" >> android/build.gradle
-          echo "allprojects {" >> android/build.gradle
-          echo "    repositories {" >> android/build.gradle
-          echo "        google()" >> android/build.gradle
-          echo "        mavenCentral()" >> android/build.gradle
-          echo "    }" >> android/build.gradle
-          echo "}" >> android/build.gradle
-          echo "rootProject.buildDir = '../build'" >> android/build.gradle
-          echo "subprojects {" >> android/build.gradle
-          echo "    project.buildDir = \"\${rootProject.buildDir}/\${project.name}\"" >> android/build.gradle
-          echo "}" >> android/build.gradle
-          echo "subprojects {" >> android/build.gradle
-          echo "    project.evaluationDependsOn(':app')" >> android/build.gradle
-          echo "}" >> android/build.gradle
-          echo "tasks.register('clean', Delete) {" >> android/build.gradle
-          echo "    delete rootProject.buildDir" >> android/build.gradle
-          echo "}" >> android/build.gradle
+          # ???? build.gradle
+          cat > android/build.gradle << 'EOF'
+          buildscript {
+              ext.kotlin_version = '1.7.10'
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:7.2.0'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:\"
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.buildDir = '../build'
+          subprojects {
+              project.buildDir = "\/\"
+          }
+          subprojects {
+              project.evaluationDependsOn(':app')
+          }
+          tasks.register('clean', Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
           
-          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle
-          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle
+          # ???? app/build.gradle
+          cat > android/app/build.gradle << 'EOF'
+          def localProperties = new Properties()
+          def localPropertiesFile = rootProject.file('local.properties')
+          if (localPropertiesFile.exists()) {
+              localPropertiesFile.withReader('UTF-8') { reader ->
+                  localProperties.load(reader)
+              }
+          }
+          def flutterRoot = localProperties.getProperty('flutter.sdk')
+          if (flutterRoot == null) {
+              throw new GradleException("Flutter SDK not found.")
+          }
+          def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+          if (flutterVersionCode == null) {
+              flutterVersionCode = '1'
+          }
+          def flutterVersionName = localProperties.getProperty('flutter.versionName')
+          if (flutterVersionName == null) {
+              flutterVersionName = '1.0'
+          }
+          apply plugin: 'com.android.application'
+          apply plugin: 'kotlin-android'
+          apply from: flutterRoot + '/packages/flutter_tools/gradle/flutter.gradle'
+          android {
+              namespace 'com.bedtimestory.app'
+              compileSdk 33
+              ndkVersion flutter.ndkVersion
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_11
+                  targetCompatibility JavaVersion.VERSION_11
+              }
+              kotlinOptions {
+                  jvmTarget = '11'
+              }
+              defaultConfig {
+                  applicationId "com.bedtimestory.app"
+                  minSdkVersion 21
+                  targetSdkVersion 33
+                  versionCode flutterVersionCode.toInteger()
+                  versionName flutterVersionName
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.debug
+                  }
+              }
+          }
+          flutter {
+              source '../..'
+          }
+          dependencies {
+              implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:\"
+          }
+          EOF
       
       - name: Build APK
         working-directory: mobile
