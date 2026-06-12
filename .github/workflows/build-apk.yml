@@ -23,16 +23,32 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
       
-      - name: Build APK
+      - name: Build APK with Kotlin fix
         run: |
           cd mobile
+          
+          # ???? android ??
           rm -rf android
+          
+          # ???? Android ??
           flutter create --platforms=android .
+          
+          # ?? Kotlin ??? 1.9.22
+          sed -i 's/ext.kotlin_version = .*/ext.kotlin_version = '\''1.9.22'\''/g' android/build.gradle
+          sed -i 's/id "org.jetbrains.kotlin.android" version .*/id "org.jetbrains.kotlin.android" version "1.9.22"/g' android/build.gradle.kts
+          
+          # ?? minSdkVersion
           sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle
+          sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/g' android/app/build.gradle
+          
+          # ????
           flutter pub get
+          
+          # ?? APK
           flutter build apk --release
       
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: app-release
+          name: bedtime-story-app
           path: mobile/build/app/outputs/flutter-apk/app-release.apk
