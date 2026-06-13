@@ -1,22 +1,19 @@
 ﻿name: bedtime_story_app
-description: AI睡前故事生成器 - 为您的孩子创造专属睡前故事
+description: AI睡前故事应用
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.2.0 <4.0.0"
+  flutter: ">=3.16.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  
-  google_fonts: ^6.1.0
-  provider: ^6.0.5
   flutter_tts: ^3.8.5
+  google_fonts: ^6.1.0
   shared_preferences: ^2.2.2
-  http: ^1.1.0
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:
