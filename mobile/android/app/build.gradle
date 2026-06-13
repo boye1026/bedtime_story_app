@@ -1,36 +1,41 @@
-﻿def localProperties = new Properties()
+﻿plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
         localProperties.load(reader)
     }
 }
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found.")
-}
+
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
     flutterVersionCode = '1'
 }
+
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
 android {
     namespace 'com.bedtimestory.app'
     compileSdk 34
     ndkVersion flutter.ndkVersion
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = '17'
     }
+
     defaultConfig {
         applicationId "com.bedtimestory.app"
         minSdk 21
@@ -38,24 +43,14 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
+
     buildTypes {
         release {
             signingConfig signingConfigs.debug
         }
     }
 }
+
 flutter {
     source '../..'
-}
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}
-configurations.all {
-    resolutionStrategy {
-        force 'org.codehaus.groovy:groovy:3.0.19'
-        force 'org.codehaus.groovy:groovy-xml:3.0.19'
-        force 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.0'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0'
-    }
 }
