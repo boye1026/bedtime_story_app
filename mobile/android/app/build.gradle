@@ -37,6 +37,9 @@ android {
     }
 
     defaultConfig {
+        targetSdk 34
+        minSdk 21
+        // 添加权限配置
         applicationId "com.bedtimestory.app"
         minSdk 21
         targetSdk 34
@@ -64,3 +67,4 @@ configurations.all {
         force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     }
 }
+
