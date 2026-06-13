@@ -1,18 +1,18 @@
 ﻿<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 网络权限 -->
+    <!-- 必要权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     
     <!-- TTS 语音权限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     
-    <!-- 存储权限（用于缓存） -->
+    <!-- 存储权限 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+                     android:maxSdkVersion="28" />
     
-    <!-- 唤醒锁权限 -->
+    <!-- 唤醒锁 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     
     <application
@@ -21,7 +21,8 @@
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
-        android:allowBackup="true">
+        android:allowBackup="true"
+        android:theme="@style/LaunchTheme">
         
         <activity
             android:name=".MainActivity"
