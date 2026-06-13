@@ -1,4 +1,4 @@
-﻿"""
+"""
 通义千问 AI 服务模块
 使用 OpenAI SDK 连接通义千问 API，提供故事生成能力
 支持流式和非流式响应
@@ -29,6 +29,10 @@ class AIService:
 
         if app is not None:
             self.init_app(app)
+
+
+# 创建全局 AI 服务实例
+ai_service = AIService()
 
     def init_app(self, app):
         """
@@ -66,6 +70,7 @@ class AIService:
         Returns:
             str: 生成的故事内容（非流式模式）
             generator: 流式响应生成器（流式模式）
+
         Raises:
             AIServiceError: AI 服务相关错误
         """
@@ -88,6 +93,7 @@ class AIService:
 
         except APIError as e:
             logger.error(f"AI API 错误: {str(e)}")
+            # 检查是否为内容安全拦截
             error_msg = str(e).lower()
             if "content" in error_msg and "safety" in error_msg:
                 raise AIServiceError("故事内容未通过安全审核，请调整生成要求后重试")
@@ -98,7 +104,16 @@ class AIService:
             raise AIServiceError(f"故事生成失败: {str(e)}")
 
     def _generate_sync(self, system_prompt, user_prompt):
-        """非流式生成故事"""
+        """
+        非流式生成故事
+
+        Args:
+            system_prompt (str): 系统提示词
+            user_prompt (str): 用户提示词
+
+        Returns:
+            str: 生成的故事文本
+        """
         logger.info("开始非流式故事生成...")
 
         response = self.client.chat.completions.create(
@@ -107,8 +122,8 @@ class AIService:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.8,
-            max_tokens=2000,
+            temperature=0.8,      # 适度的创造性
+            max_tokens=2000,        # 最大生成长度
             top_p=0.9,
             stream=False,
         )
@@ -119,7 +134,16 @@ class AIService:
         return content
 
     def _generate_stream(self, system_prompt, user_prompt):
-        """流式生成故事"""
+        """
+        流式生成故事
+
+        Args:
+            system_prompt (str): 系统提示词
+            user_prompt (str): 用户提示词
+
+        Yields:
+            str: 逐段生成的故事文本
+        """
         logger.info("开始流式故事生成...")
 
         response = self.client.chat.completions.create(
@@ -142,10 +166,6 @@ class AIService:
                 yield delta
 
         logger.info(f"流式故事生成完成，总长度: {len(full_content)} 字符")
-
-
-# 创建全局 AI 服务实例
-ai_service = AIService()
 
 
 class AIServiceError(Exception):

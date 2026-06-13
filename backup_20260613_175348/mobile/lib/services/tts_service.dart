@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class TTSService {
@@ -101,16 +101,9 @@ class TTSService {
     }
   }
 
-  Future<void> setSpeechRate(double rate) async {
-    await _flutterTts.setSpeechRate(rate);
-  }
-
-  Future<void> setPitch(double pitch) async {
-    await _flutterTts.setPitch(pitch);
-  }
-
   void dispose() {
     stop();
+    // 移除 Null 赋值，直接设置回调
     _flutterTts.setStartHandler(() {});
     _flutterTts.setCompletionHandler(() {});
     _flutterTts.setErrorHandler((msg) {});
