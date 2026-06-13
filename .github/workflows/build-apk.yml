@@ -30,7 +30,7 @@ jobs:
           cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-bin.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
@@ -42,6 +42,7 @@ jobs:
           org.gradle.daemon=true
           org.gradle.parallel=true
           org.gradle.caching=true
+          android.experimental=android.enableNewDsl
           EOF
           
           cat > android/settings.gradle << 'EOF'
@@ -62,8 +63,8 @@ jobs:
           }
           plugins {
               id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-              id "com.android.application" version "8.3.2" apply false
-              id "org.jetbrains.kotlin.android" version "1.9.22" apply false
+              id "com.android.application" version "8.7.0" apply false
+              id "org.jetbrains.kotlin.android" version "2.0.20" apply false
           }
           include ":app"
           EOF
@@ -145,10 +146,6 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle-
-      
-      - name: Get Flutter version
-        working-directory: mobile
-        run: flutter --version
       
       - name: Install dependencies
         working-directory: mobile

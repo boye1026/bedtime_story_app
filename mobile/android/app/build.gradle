@@ -4,6 +4,10 @@
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+android.experimental {
+    // 兼容 AGP 9+ 新 DSL
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
