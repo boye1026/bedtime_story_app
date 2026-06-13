@@ -3,7 +3,6 @@
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
-
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -11,60 +10,38 @@ if (localPropertiesFile.exists()) {
         localProperties.load(reader)
     }
 }
-
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
     flutterVersionCode = '1'
 }
-
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
-
 android {
     namespace 'com.bedtimestory.app'
     compileSdk 34
-    ndkVersion = flutter.ndkVersion
-
+    ndkVersion = "25.1.8937393"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = '17'
     }
-
     defaultConfig {
-        targetSdk 34
-        minSdk 21
-        // 添加权限配置
         applicationId "com.bedtimestory.app"
         minSdk 21
         targetSdk 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
-
     buildTypes {
         release {
             signingConfig signingConfigs.debug
         }
     }
 }
-
 flutter {
     source '../..'
 }
-
-// 全局依赖冲突解决
-configurations.all {
-    resolutionStrategy {
-        // 强制统一 Kotlin 版本
-        force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    }
-}
-
