@@ -1,14 +1,41 @@
 ﻿# Flutter
-.Dart_tool/
-.pub/
+.metadata
+.packages
+.dart_tool/
 build/
-*.apk
-*.aab
+flutter_*.png
+*.iml
+*.ipr
+*.iws
+.idea/
 
 # Android
+*.apk
+*.aab
+*.keystore
+android/app/debug/
+android/app/profile/
+android/app/release/
 android/.gradle/
 android/local.properties
+android/**/build/
 
-# IDE
-.idea/
-.vscode/
+# iOS
+Pods/
+Podfile.lock
+*.xcworkspace
+*.xccallback
+
+# Logs
+*.log
+crash_*.txt
+full_crash.txt
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+*.key
+*.pem
