@@ -2,9 +2,34 @@
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
-void main() {
-  runApp(const BedtimeStoryApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // 捕获所有错误并保存到文件
+  FlutterError.onError = (FlutterErrorDetails details) async {
+    final errorLog = '${DateTime.now()}\n${details.exception}\n${details.stack}\n---\n';
+    await _saveErrorLog(errorLog);
+  };
+  
+  runZonedGuarded(() async {
+    runApp(const BedtimeStoryApp());
+  }, (error, stack) async {
+    final errorLog = '${DateTime.now()}\nGLOBAL ERROR: $error\n$stack\n---\n';
+    await _saveErrorLog(errorLog);
+  });
+}
+
+Future<void> _saveErrorLog(String log) async {
+  try {
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/crash_log.txt');
+    await file.writeAsString(log, mode: FileMode.append);
+  } catch (e) {
+    // 忽略保存失败
+  }
 }
 
 class BedtimeStoryApp extends StatelessWidget {
@@ -17,6 +42,7 @@ class BedtimeStoryApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
         scaffoldBackgroundColor: const Color(0xFFFDF6E3),
+        textTheme: GoogleFonts.poppinsTextTheme(),
         useMaterial3: true,
       ),
       home: const HomePage(),
@@ -56,7 +82,7 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       setState(() {
-        _statusMessage = '语音引擎初始化失败';
+        _statusMessage = '语音引擎初始化失败，但您仍然可以阅读故事';
       });
     }
   }
@@ -94,7 +120,7 @@ class _HomePageState extends State<HomePage> {
     await _saveName(name);
     
     setState(() {
-      _generatedStory = "从前有一个叫$name的小朋友，他/她非常勇敢善良。每天晚上都会听着故事进入甜美的梦乡。🌙✨";
+      _generatedStory = "从前有一个叫$name的小朋友，他/她非常勇敢善良。每天晚上都会听着故事进入甜美的梦乡。🌙✨\n\n故事开始：\n\n在梦境王国里，$name遇到了会说话的小星星。小星星说：'勇敢的小朋友，让我们一起去冒险吧！'\n\n$name开心地点点头，跟着小星星飞向了天空。他们穿过了棉花糖做的云朵，越过了彩虹桥，来到了月亮城堡。\n\n晚安，亲爱的$name，愿你今夜好梦。🌙✨";
       _statusMessage = '故事生成成功！';
     });
   }
