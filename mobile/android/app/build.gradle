@@ -54,3 +54,13 @@ android {
 flutter {
     source '../..'
 }
+
+// 全局依赖冲突解决
+configurations.all {
+    resolutionStrategy {
+        // 强制统一 Kotlin 版本
+        force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    }
+}
