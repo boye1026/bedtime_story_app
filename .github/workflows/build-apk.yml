@@ -1,4 +1,4 @@
-name: Build APK
+﻿name: Build APK
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v4
       
@@ -20,30 +21,29 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.16.9'
+          flutter-version: '3.22.0'
           channel: 'stable'
       
-      - name: Complete Gradle fix
+      - name: Fix Gradle configuration
         working-directory: mobile
         run: |
-          mkdir -p android/gradle/wrapper
           cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
           distributionBase=GRADLE_USER_HOME
           distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-9.1.0-bin.zip
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.3-bin.zip
           zipStoreBase=GRADLE_USER_HOME
           zipStorePath=wrapper/dists
           EOF
           
           cat > android/build.gradle << 'EOF'
           buildscript {
-              ext.kotlin_version = '1.9.20'
+              ext.kotlin_version = '1.9.22'
               repositories {
                   google()
                   mavenCentral()
               }
               dependencies {
-                  classpath 'com.android.tools.build:gradle:8.3.0'
+                  classpath 'com.android.tools.build:gradle:8.1.4'
                   classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
               }
           }
@@ -87,11 +87,10 @@ jobs:
           }
           apply plugin: 'com.android.application'
           apply plugin: 'kotlin-android'
-          apply from: flutterRoot + '/packages/flutter_tools/gradle/flutter.gradle'
+          apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
           android {
               namespace 'com.bedtimestory.app'
               compileSdk 34
-              ndkVersion flutter.ndkVersion
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
@@ -101,8 +100,8 @@ jobs:
               }
               defaultConfig {
                   applicationId "com.bedtimestory.app"
-                  minSdkVersion 21
-                  targetSdkVersion 34
+                  minSdk 21
+                  targetSdk 34
                   versionCode flutterVersionCode.toInteger()
                   versionName flutterVersionName
               }
@@ -118,14 +117,23 @@ jobs:
           dependencies {
               implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
           }
+          configurations.all {
+              resolutionStrategy {
+                  force 'org.codehaus.groovy:groovy:3.0.19'
+                  force 'org.codehaus.groovy:groovy-xml:3.0.19'
+              }
+          }
           EOF
       
-      - name: Build APK
+      - name: Install dependencies
         working-directory: mobile
         run: |
           flutter clean
           flutter pub get
-          flutter build apk --release
+      
+      - name: Build APK
+        working-directory: mobile
+        run: flutter build apk --release
       
       - uses: actions/upload-artifact@v4
         with:
